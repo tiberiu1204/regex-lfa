@@ -39,17 +39,8 @@ int main() {
     for(int i = 0; i < num_words; i++) {
         std::string word;
         in >> word;
-        std::vector<std::tuple<int, int> > path = automata.accept(word);
-        if(!path.empty()) {
-            out<<"DA: ";
-            for(const auto &state : path) {
-                out<<std::get<0>(state)<<" ";
-            }
-            out<<"\nTotal length of path in nodes: "<<path.size()<<"\n";
-        }
-        else {
-            out<<"NU\n";
-        }
+        if(automata.accept(word)) std::cout<<"DA\n";
+        else std::cout<<"NU\n";
     }
     in.close();
     out.close();

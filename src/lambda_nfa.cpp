@@ -52,30 +52,31 @@ void Automata::add_term_node(int state) {
 }
 
 bool Automata::accept(const std::string &word) {
-    std::vector <std::tuple<int, int>> stack; //state, index
-    std::unordered_map<int, std::set<int> > visited;
-    stack.emplace_back(init_state, init_state);
-    while (!stack.empty()) {
+    std::vector<std::tuple<int, int> > stack; //state, index
+    std::unordered_map<int, std::unordered_set<int> > visited;
+    stack.emplace_back(init_state, 0);
+    while(!stack.empty()) {
         int state = std::get<0>(stack.back());
         int index = std::get<1>(stack.back());
         stack.pop_back();
 
-        if (index == word.length()) {
-            if (nodes[state].check_is_terminal()) {
+        if(index == word.length()) {
+            if(nodes[state].check_is_terminal()) {
                 return true;
             }
         }
 
         visited[state].insert(index);
 
-        for (auto &edge: nodes[state].get_edges()) {
+        for(auto &edge : nodes[state].get_edges()) {
             int dest_state = edge.get_dest().get_state();
-            if (edge.get_trans_char() == word[index]) {
-                if (visited[dest_state].find(index + 1) == visited[dest_state].end()) {
+            if(edge.get_trans_char() == word[index]) {
+                if(visited[dest_state].find(index + 1) == visited[dest_state].end()) {
                     stack.emplace_back(dest_state, index + 1);
                 }
-            } else if (edge.get_trans_char() == '-') {
-                if (visited[dest_state].find(index) == visited[dest_state].end()) {
+            }
+            else if(edge.get_trans_char() == '-') {
+                if(visited[dest_state].find(index) == visited[dest_state].end()) {
                     stack.emplace_back(dest_state, index);
                 }
             }
