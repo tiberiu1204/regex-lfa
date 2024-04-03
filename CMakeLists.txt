@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(LambdaNFA main.cpp
         include/lambda_nfa.h
-        src/lambda_nfa.cpp)
+        src/lambda_nfa.cpp
+        include/regex_engine.h
+        src/regex_engine.cpp)
