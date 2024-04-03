@@ -27,6 +27,30 @@ Regex::Regex(std::string expr) : expr(std::move(expr)) {
 bool Regex::eval(const std::string &word) {
 
 }
+/*
+ * GRAMMAR:
+ * expr :- concat expr' $ ;
+ * expr' :- '|' concat expr' | epsilon ;
+ * concat :- primary concat' | star concat' ;
+ * concat' :- primary concat' | star concat' | epsilon ;
+ * star :- primary '*' ;
+ * primary :- literal | '(' expr ')' ;
+ *
+ * FIRST(expr) = { literal, ( }
+ * FIRST(expr') = { |, epsilon }
+ * FIRST(concat) = { literal, ( }
+ * FIRST(concat') = { literal, (, epsilon }
+ * FIRST(STAR) = { literal, ( }
+ * FIRST(primary) = { literal, ( }
+ *
+ * FORWARD(expr) = { ), $ }
+ * FORWARD(expr') = { ), $ }
+ * FORWARD(concat) = { |, ), $ }
+ * FORWARD(concat') = { |, ), $ }
+ * FORWARD(star) = { literal, (, |, ), $ }
+ * FORWARD(primary) = { *, literal, (, |, ), $ }
+ *
+ */
 
 SyntaxTree Parser::parse(const std::string &expr) {
 
