@@ -14,20 +14,20 @@ std::vector<Parser::Symbol> Parser::prod_table[prod_count][terminal_count] = {
 {{}, {}, {P_LPAREN_T, P_EXPR, P_RPAREN_T}, {}, {P_LITERAL_T}, {}}
 };
 
-SyntaxTree::Node::Node(SyntaxTree::NodeType type) : type(type) {}
-void SyntaxTree::Node::set_type(SyntaxTree::NodeType node_type) {
+SyntaxTreeNode::SyntaxTreeNode(NodeType type) : type(type) {}
+void SyntaxTreeNode::set_type(NodeType node_type) {
     this->type = node_type;
 }
 
-SyntaxTree::NodeType SyntaxTree::Node::get_type() const {
+SyntaxTreeNode::NodeType SyntaxTreeNode::get_type() const {
     return this->type;
 }
 
-void SyntaxTree::Node::insert_child(Node *node) {
+void SyntaxTreeNode::insert_child(SyntaxTreeNode *node) {
     this->children.push_back(node);
 }
 
-void SyntaxTree::emplace_node(SyntaxTree::NodeType type) {
+void SyntaxTree::emplace_node(SyntaxTreeNode::NodeType type) {
     this->nodes.emplace_back(type);
 }
 
@@ -55,6 +55,8 @@ Parser::Symbol Parser::char_to_symbol(char ch) {
 }
 
 SyntaxTree Parser::parse(const std::string &expr) {
+    SyntaxTree tree;
+
     std::stack<Symbol> s;
     s.push(P_EXPR);
 
@@ -88,9 +90,6 @@ SyntaxTree Parser::parse(const std::string &expr) {
             s.push(*it);
         }
     }
-
-    if(s.empty() && expr_it == expr.end()) std::cout<<"Yes\n";
-    else std::cout<<"No\n";
 
     return {};
 }

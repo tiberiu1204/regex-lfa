@@ -5,9 +5,7 @@
 #include <vector>
 #include <memory>
 
-class SyntaxTree {
-private:
-    class Node;
+class SyntaxTreeNode {
 public:
     enum NodeType {
         CONCAT,
@@ -15,21 +13,22 @@ public:
         OR,
         LITERAL
     };
-
-    void emplace_node(NodeType node);
+    explicit SyntaxTreeNode(NodeType type = CONCAT);
+    void set_type(NodeType node_type);
+    void insert_child(SyntaxTreeNode *node);
+    [[nodiscard]] NodeType get_type() const;
 private:
-    std::vector<Node> nodes;
+    NodeType type;
+    std::vector<SyntaxTreeNode *> children;
+};
 
-    class Node {
-    public:
-        explicit Node(NodeType type = CONCAT);
-        void set_type(NodeType node_type);
-        void insert_child(Node *node);
-        [[nodiscard]] NodeType get_type() const;
-    private:
-        NodeType type;
-        std::vector<Node *> children;
-    };
+class SyntaxTree {
+public:
+    void emplace_node(SyntaxTreeNode::NodeType node);
+private:
+    std::vector<SyntaxTreeNode> nodes;
+
+
 };
 
 class Regex {
