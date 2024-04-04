@@ -13,22 +13,24 @@ public:
         OR,
         LITERAL
     };
-    explicit SyntaxTreeNode(NodeType type = CONCAT);
+    explicit SyntaxTreeNode(NodeType type, char ch);
     void set_type(NodeType node_type);
     void insert_child(SyntaxTreeNode *node);
     [[nodiscard]] NodeType get_type() const;
+    [[nodiscard]] const std::vector<SyntaxTreeNode *> &get_children() const;
 private:
     NodeType type;
+    char value;
     std::vector<SyntaxTreeNode *> children;
 };
 
 class SyntaxTree {
 public:
-    void emplace_node(SyntaxTreeNode::NodeType node);
+    void emplace_node(SyntaxTreeNode::NodeType type, char value);
+    void insert_child(SyntaxTreeNode *father, SyntaxTreeNode *child);
+    [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
 private:
     std::vector<SyntaxTreeNode> nodes;
-
-
 };
 
 class Regex {

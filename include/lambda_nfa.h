@@ -9,7 +9,7 @@
 class Node;
 
 /*
- * A class that represents an edge (or transition) in the Automata. It contains the transition char and the destination
+ * A class that represents an edge (or transition) in the Automaton. It contains the transition char and the destination
  * node as a reference.
  *
  * If the transition char in the input will be '-', it will be considered a lambda transition.
@@ -28,7 +28,7 @@ public:
 };
 
 /*
- * A class that represents a node in the automata. It is represented by a state and a list of edges (or transitions).
+ * A class that represents a node in the Automaton. It is represented by a state and a list of edges (or transitions).
  *
  * It has a print method used for debugging.
  *
@@ -49,21 +49,21 @@ public:
 };
 
 /*
- * A class that represents the Automata itself. It contains nodes, an initial state and a list of terminal states.
+ * A class that represents the Automaton itself. It contains nodes, an initial state and a list of terminal states.
  *
  * It has a print method used for debugging.
  *
- * The class is also implemented to work with all types of automata.
+ * The class is also implemented to work with all types of Automaton.
  *
  */
 
-class Automata {
+class Automaton {
 private:
     std::unordered_map<int, Node> nodes;
     int init_state;
     std::vector<int> term_states;
 public:
-    Automata();
+    Automaton();
     void insert_node(int state);
     void insert_edge(int dest, int src, char tc);
     void set_init_node(int state);

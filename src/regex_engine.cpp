@@ -14,9 +14,18 @@ std::vector<Parser::Symbol> Parser::prod_table[prod_count][terminal_count] = {
 {{}, {}, {P_LPAREN_T, P_EXPR, P_RPAREN_T}, {}, {P_LITERAL_T}, {}}
 };
 
-SyntaxTreeNode::SyntaxTreeNode(NodeType type) : type(type) {}
+SyntaxTreeNode::SyntaxTreeNode(NodeType type, char ch) : type(type), value(ch) {}
+
 void SyntaxTreeNode::set_type(NodeType node_type) {
     this->type = node_type;
+}
+
+const std::vector<SyntaxTreeNode *> &SyntaxTreeNode::get_children() const {
+    return this->children;
+}
+
+const std::vector<SyntaxTreeNode> &SyntaxTree::get_nodes() const {
+    return this->nodes;
 }
 
 SyntaxTreeNode::NodeType SyntaxTreeNode::get_type() const {
@@ -27,9 +36,14 @@ void SyntaxTreeNode::insert_child(SyntaxTreeNode *node) {
     this->children.push_back(node);
 }
 
-void SyntaxTree::emplace_node(SyntaxTreeNode::NodeType type) {
-    this->nodes.emplace_back(type);
+void SyntaxTree::emplace_node(SyntaxTreeNode::NodeType type, char value) {
+    this->nodes.emplace_back(type, value);
 }
+
+void SyntaxTree::insert_child(SyntaxTreeNode *father, SyntaxTreeNode *child) {
+    father->insert_child(child);
+}
+
 
 Regex::Regex(std::string expr) : expr(std::move(expr)) {
     this->tree = Parser::parse(expr);
@@ -72,6 +86,9 @@ SyntaxTree Parser::parse(const std::string &expr) {
             else if(expr_it == expr.end()) break;
             else {
                 assert(curr_prod == term_sym);
+                if(*expr_it != '*' && *expr_it != '|' && *expr_it != '(' && *expr_it != ')') {
+                    tree.emplace_node(SyntaxTreeNode::LITERAL, *expr_it);
+                }
                 expr_it++;
                 if(expr_it == expr.end()) {
                     term_sym = EOF_T;
@@ -84,6 +101,26 @@ SyntaxTree Parser::parse(const std::string &expr) {
 
         assert(curr_prod < Parser::prod_count);
         assert(term_sym - 8 < Parser::terminal_count);
+
+        switch(curr_prod) {
+            case P_EXPR:
+                tree.emplace_node(SyntaxTreeNode::NodeType::OR, '|');
+                break;
+            case P_EXPR_PR:
+                break;
+            case P_CONCAT:
+                tree.emplace_node(SyntaxTreeNode::NodeType::CONCAT, '.');
+                break;
+            case P_CONCAT_PR:
+                break;
+            case P_STAR:
+                tree.emplace_node(SyntaxTreeNode::NodeType::STAR, '*');
+                break;
+            case P_STAR_PR:
+                break;
+            default:
+                break;
+        }
 
         std::vector<Symbol> production = Parser::prod_table[curr_prod][term_sym - 8];
         for(auto it = production.end() - 1; !production.empty() && it >= production.begin(); it--) {

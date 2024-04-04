@@ -32,26 +32,26 @@ const std::vector<Edge> &Node::get_edges() const {
     return this->edges;
 }
 
-void Automata::insert_node(int state) {
+void Automaton::insert_node(int state) {
     this->nodes[state] = Node(state);
 }
 
-Automata::Automata() : init_state(0) {}
+Automaton::Automaton() : init_state(0) {}
 
-void Automata::insert_edge(int dest, int src, char tc) {
+void Automaton::insert_edge(int dest, int src, char tc) {
     this->nodes[src].insert_edge(Edge(tc, this->nodes[dest]));
 }
 
-void Automata::set_init_node(int state) {
+void Automaton::set_init_node(int state) {
     this->init_state = state;
 }
 
-void Automata::add_term_node(int state) {
+void Automaton::add_term_node(int state) {
     this->nodes[state].set_terminal();
     this->term_states.push_back(state);
 }
 
-bool Automata::accept(const std::string &word) {
+bool Automaton::accept(const std::string &word) {
     std::vector<std::tuple<int, int> > stack; //state, index
     std::unordered_map<int, std::unordered_set<int> > visited;
     stack.emplace_back(init_state, 0);
