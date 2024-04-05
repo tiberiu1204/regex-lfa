@@ -26,7 +26,7 @@ private:
 
 class SyntaxTree {
 public:
-    void emplace_node(SyntaxTreeNode::NodeType type, char value);
+    SyntaxTreeNode *emplace_node(SyntaxTreeNode::NodeType type, char value);
     void insert_child(SyntaxTreeNode *father, SyntaxTreeNode *child);
     [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
 private:
@@ -83,6 +83,14 @@ private:
         P_STAR_PR = 5,
         P_PRIMARY = 6,
         P_EPSILON = 7,
+        M_EXPR,
+        M_EXPR_PR,
+        M_CONCAT,
+        M_CONCAT_PR,
+        M_STAR,
+        M_STAR_PR,
+        M_PRIMARY,
+        M_END,
         P_STAR_T,    // 0
         P_OR_T,      // 1
         P_LPAREN_T,  // 2
