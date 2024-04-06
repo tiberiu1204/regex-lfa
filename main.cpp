@@ -45,5 +45,5 @@ int main() {
 //    }
 //    in.close();
 //    out.close();
-    Parser::parse("(a|(ba|s))*");
+    auto tree = Parser::parse("ab");
 }

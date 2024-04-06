@@ -15,19 +15,19 @@ public:
     };
     explicit SyntaxTreeNode(NodeType type, char ch);
     void set_type(NodeType node_type);
-    void insert_child(SyntaxTreeNode *node);
+    void insert_child(int node_index);
     [[nodiscard]] NodeType get_type() const;
-    [[nodiscard]] const std::vector<SyntaxTreeNode *> &get_children() const;
+    [[nodiscard]] const std::vector<int> &get_children() const;
 private:
     NodeType type;
     char value;
-    std::vector<SyntaxTreeNode *> children;
+    std::vector<int> children;
 };
 
 class SyntaxTree {
 public:
-    SyntaxTreeNode *emplace_node(SyntaxTreeNode::NodeType type, char value);
-    void insert_child(SyntaxTreeNode *father, SyntaxTreeNode *child);
+    int emplace_node(SyntaxTreeNode::NodeType type, char value);
+    void insert_child(int father_index, int child_index);
     [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
 private:
     std::vector<SyntaxTreeNode> nodes;
@@ -89,7 +89,6 @@ private:
         M_CONCAT_PR,
         M_STAR,
         M_STAR_PR,
-        M_PRIMARY,
         M_END,
         P_STAR_T,    // 0
         P_OR_T,      // 1
