@@ -16,6 +16,10 @@ std::vector<Parser::Symbol> Parser::prod_table[prod_count][terminal_count] = {
 
 SyntaxTreeNode::SyntaxTreeNode(NodeType type, char ch) : type(type), value(ch) {}
 
+const SyntaxTreeNode &SyntaxTree::root() const {
+    return this->nodes.back();
+}
+
 void SyntaxTreeNode::set_type(NodeType node_type) {
     this->type = node_type;
 }
@@ -107,39 +111,43 @@ SyntaxTree Parser::parse(const std::string &expr) {
             continue;
         }
         else if(curr_prod >= M_EXPR) {
-            int node = -1, child1, child2;
+            int node = -1;
             switch(curr_prod) {
                 case M_EXPR:
                 case M_EXPR_PR:
-                    child1 = value_stack.top();
-                    value_stack.pop();
-                    child2 = value_stack.top();
-                    value_stack.pop();
-                    if(child1 < 0 && child2 < 0) break;
+                    if(value_stack.top() < 0) {
+                        value_stack.pop();
+                        break;
+                    }
                     node = tree.emplace_node(SyntaxTreeNode::OR, 0);
-                    if(child1 >= 0) tree.insert_child(node, child1);
-                    if(child2 >= 0) tree.insert_child(node, child2);
+                    tree.insert_child(node, value_stack.top());
+                    value_stack.pop();
+                    tree.insert_child(node, value_stack.top());
+                    value_stack.pop();
                     break;
                 case M_CONCAT:
                 case M_CONCAT_PR:
-                    child1 = value_stack.top();
-                    value_stack.pop();
-                    child2 = value_stack.top();
-                    value_stack.pop();
-                    if(child1 < 0 && child2 < 0) break;
+                    if(value_stack.top() < 0) {
+                        value_stack.pop();
+                        break;
+                    }
                     node = tree.emplace_node(SyntaxTreeNode::CONCAT, 0);
-                    if(child1 >= 0) tree.insert_child(node, child1);
-                    if(child2 >= 0) tree.insert_child(node, child2);
+                    tree.insert_child(node, value_stack.top());
+                    value_stack.pop();
+                    tree.insert_child(node, value_stack.top());
+                    value_stack.pop();
                     break;
                 case M_STAR:
-                    child1 = value_stack.top();
-                    value_stack.pop();
-                    if(child1 < 0) break;
+                    if(value_stack.top() < 0) {
+                        value_stack.pop();
+                        break;
+                    }
                     node = tree.emplace_node(SyntaxTreeNode::STAR, 0);
-                    tree.insert_child(node, child1);
+                    tree.insert_child(node, value_stack.top());
+                    value_stack.pop();
                     break;
                 case M_END:
-                    break;
+                    return tree;
                 default:
                     break;
             }
@@ -155,6 +163,5 @@ SyntaxTree Parser::parse(const std::string &expr) {
             prod_stack.push(*it);
         }
     }
-
-    return tree;
+    // Error;
 }

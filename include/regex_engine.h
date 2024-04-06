@@ -29,6 +29,7 @@ public:
     int emplace_node(SyntaxTreeNode::NodeType type, char value);
     void insert_child(int father_index, int child_index);
     [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
+    const SyntaxTreeNode &root() const;
 private:
     std::vector<SyntaxTreeNode> nodes;
 };
@@ -68,6 +69,11 @@ private:
  * FORWARD(star') = { literal, (, |, ), $ }
  * FORWARD(primary) = { *, literal, (, |, ), $ }
  *
+ */
+
+/*
+ *  Using LL(1) algorithm to parse the regex expression according to the grammar described above and also building the
+ *  AST (class SyntaxTree) in the process.
  */
 
 class Parser {
