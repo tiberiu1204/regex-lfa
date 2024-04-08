@@ -26,6 +26,7 @@ public:
     Edge(const Edge &other, const std::unordered_map<int, int> &new_keys);
     [[nodiscard]] int get_dest() const;
     [[nodiscard]] char get_trans_char() const;
+    void print() const;
 };
 
 /*
@@ -48,6 +49,7 @@ public:
     void set_terminal(bool is = true);
     [[nodiscard]] int get_state() const;
     [[nodiscard]] const std::vector<Edge> &get_edges() const;
+    void print() const;
 };
 
 /*
@@ -66,6 +68,7 @@ private:
 //    std::unordered_set<int> term_states;
 public:
     Automaton();
+    explicit Automaton(char trans_char);
     void insert_node(int state);
     void insert_edge(int dest, int src, char tc);
     void set_init_node(int state);
@@ -84,6 +87,7 @@ public:
     Automaton operator*(const Automaton &other);
     Automaton &operator*=(const Automaton &other);
     Automaton operator*();
+    void print() const;
 };
 
 #endif //LAMBDANFA_LAMBDA_NFA_H

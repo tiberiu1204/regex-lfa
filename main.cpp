@@ -45,5 +45,6 @@ int main() {
 //    }
 //    in.close();
 //    out.close();
-    auto tree = Parser::parse("(ab|c)*");
+    Regex reg("ab(cd|ef)*");
+    std::cout<<reg.eval("abcdcdefcdefcdefab");
 }

@@ -16,8 +16,8 @@ std::vector<Parser::Symbol> Parser::prod_table[prod_count][terminal_count] = {
 
 SyntaxTreeNode::SyntaxTreeNode(NodeType type, char ch) : type(type), value(ch) {}
 
-const SyntaxTreeNode &SyntaxTree::root() const {
-    return this->nodes.back();
+int SyntaxTree::root_index() const {
+    return static_cast<int>(this->nodes.size() - 1);
 }
 
 void SyntaxTreeNode::set_type(NodeType node_type) {
@@ -46,12 +46,75 @@ int SyntaxTree::emplace_node(SyntaxTreeNode::NodeType type, char value) {
 }
 
 Regex::Regex(std::string expr) : expr(std::move(expr)) {
-    this->tree = Parser::parse(expr);
+    this->tree = Parser::parse(this->expr);
+    this->l_nfa = this->construct_nfa();
+}
+
+char SyntaxTreeNode::get_value() const {
+    return this->value;
+}
+
+Automaton Regex::construct_nfa() {
+    struct tree_index {
+        int index;
+        bool push_automaton;
+        tree_index(int index, bool push_automaton) : index(index), push_automaton(push_automaton) {}
+    };
+
+    std::stack<tree_index> tree_stack;
+    std::stack<Automaton> automaton_stack;
+    tree_stack.emplace(this->tree.root_index(), false);
+
+    const std::vector<SyntaxTreeNode> &tree_nodes = this->tree.get_nodes();
+
+    while(!tree_stack.empty()) {
+        int node_index = tree_stack.top().index;
+        const SyntaxTreeNode &tree_node = tree_nodes[node_index];
+        bool push_automaton = tree_stack.top().push_automaton;
+        tree_stack.pop();
+
+        if(push_automaton) {
+            Automaton automaton, a1, a2;
+            switch(tree_node.get_type()) {
+                case SyntaxTreeNode::LITERAL:
+                    automaton_stack.emplace(tree_node.get_value());
+                    break;
+                case SyntaxTreeNode::STAR:
+                    automaton = *automaton_stack.top();
+                    automaton_stack.pop();
+                    automaton_stack.push(automaton);
+                    break;
+                case SyntaxTreeNode::OR:
+                    a1 = automaton_stack.top();
+                    automaton_stack.pop();
+                    a2 = automaton_stack.top();
+                    automaton_stack.pop();
+                    automaton = a2 | a1;
+                    automaton_stack.push(automaton);
+                    break;
+                case SyntaxTreeNode::CONCAT:
+                    a1 = automaton_stack.top();
+                    automaton_stack.pop();
+                    a2 = automaton_stack.top();
+                    automaton_stack.pop();
+                    automaton = a2 * a1;
+                    automaton_stack.push(automaton);
+                    break;
+            }
+        }
+        else {
+            tree_stack.emplace(node_index, true);
+            const std::vector<int> &children = tree_node.get_children();
+            for(const auto &child : children) {
+                tree_stack.emplace(child, false);
+            }
+        }
+    }
+    return automaton_stack.top();
 }
 
 bool Regex::eval(const std::string &word) {
-
-    return false;
+    return this->l_nfa.accept(word);
 }
 
 Parser::Symbol Parser::char_to_symbol(char ch) {
@@ -169,5 +232,6 @@ SyntaxTree Parser::parse(const std::string &expr) {
 
 void Regex::set_expr(const std::string &new_expr) {
     this->expr = new_expr;
-    tree = Parser::parse(new_expr);
+    this->tree = Parser::parse(new_expr);
+    this->l_nfa = this->construct_nfa();
 }

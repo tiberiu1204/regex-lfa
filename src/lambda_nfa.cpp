@@ -134,6 +134,25 @@ Automaton &Automaton::operator|=(const Automaton &other) {
     return *this;
 }
 
+void Node::print() const {
+    std::cout<<"State: "<<state<<(this->is_terminal ? " terminal" : "")<<"\nEdges: ";
+    for(auto edge : edges) {
+        edge.print();
+    }
+    std::cout<<"\n";
+}
+
+void Edge::print() const {
+    std::cout<<"('"<<this->trans_char<<"', "<<this->dest<<") ";
+}
+
+void Automaton::print() const {
+    std::cout<<"Initial state: "<<init_state<<"\n";
+    for(const auto &state_node_p : nodes) {
+        state_node_p.second.print();
+    }
+}
+
 Automaton Automaton::operator*(const Automaton &other) {
     Automaton result;
     int index = 0;
@@ -171,6 +190,14 @@ Automaton Automaton::operator*(const Automaton &other) {
 Automaton &Automaton::operator*=(const Automaton &other) {
     *this = *this * other;
     return *this;
+}
+
+Automaton::Automaton(char trans_char) {
+    this->init_state = 0;
+    this->insert_node(0);
+    this->insert_node(1);
+    this->nodes[1].set_terminal(true);
+    this->insert_edge(1, 0, trans_char);
 }
 
 Automaton Automaton::operator*() {

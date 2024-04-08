@@ -21,6 +21,7 @@ public:
     void insert_child(int node_index);
     [[nodiscard]] NodeType get_type() const;
     [[nodiscard]] const std::vector<int> &get_children() const;
+    [[nodiscard]] char get_value() const;
 private:
     NodeType type;
     char value;
@@ -32,7 +33,7 @@ public:
     int emplace_node(SyntaxTreeNode::NodeType type, char value);
     void insert_child(int father_index, int child_index);
     [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
-    [[nodiscard]] const SyntaxTreeNode &root() const;
+    [[nodiscard]] int root_index() const;
 private:
     std::vector<SyntaxTreeNode> nodes;
 };
@@ -46,6 +47,8 @@ private:
     Automaton l_nfa;
     std::string expr;
     SyntaxTree tree;
+
+    Automaton construct_nfa();
 };
 
 /*
