@@ -50,6 +50,7 @@ Regex::Regex(std::string expr) : expr(std::move(expr)) {
 }
 
 bool Regex::eval(const std::string &word) {
+
     return false;
 }
 
@@ -163,5 +164,10 @@ SyntaxTree Parser::parse(const std::string &expr) {
             prod_stack.push(*it);
         }
     }
-    // Error;
+    throw ExpressionNotRegex();
+}
+
+void Regex::set_expr(const std::string &new_expr) {
+    this->expr = new_expr;
+    tree = Parser::parse(new_expr);
 }

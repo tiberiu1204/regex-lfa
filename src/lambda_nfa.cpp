@@ -1,13 +1,18 @@
 #include "lambda_nfa.h"
 
-Edge::Edge(char trans_char, Node &dest) : trans_char(trans_char), dest(dest) {}
+Edge::Edge(char trans_char, int dest) : trans_char(trans_char), dest(dest) {}
 
-const Node &Edge::get_dest() const {
+int Edge::get_dest() const {
     return this->dest;
 }
 
 char Edge::get_trans_char() const {
     return this->trans_char;
+}
+
+Edge::Edge(const Edge &other, const std::unordered_map<int, int> &new_keys) {
+    this->trans_char = other.trans_char;
+    this->dest = new_keys.at(other.dest);
 }
 
 Node::Node(int state) : state(state), is_terminal(false) {}
@@ -24,8 +29,8 @@ int Node::get_state() const {
     return this->state;
 }
 
-void Node::set_terminal() {
-    this->is_terminal = true;
+void Node::set_terminal(bool is) {
+    this->is_terminal = is;
 }
 
 const std::vector<Edge> &Node::get_edges() const {
@@ -39,7 +44,7 @@ void Automaton::insert_node(int state) {
 Automaton::Automaton() : init_state(0) {}
 
 void Automaton::insert_edge(int dest, int src, char tc) {
-    this->nodes[src].insert_edge(Edge(tc, this->nodes[dest]));
+    this->nodes[src].insert_edge(Edge(tc, dest));
 }
 
 void Automaton::set_init_node(int state) {
@@ -48,7 +53,7 @@ void Automaton::set_init_node(int state) {
 
 void Automaton::add_term_node(int state) {
     this->nodes[state].set_terminal();
-    this->term_states.push_back(state);
+//    this->term_states.insert(state);
 }
 
 bool Automaton::accept(const std::string &word) {
@@ -69,7 +74,7 @@ bool Automaton::accept(const std::string &word) {
         visited[state].insert(index);
 
         for(auto &edge : nodes[state].get_edges()) {
-            int dest_state = edge.get_dest().get_state();
+            int dest_state = nodes[edge.get_dest()].get_state();
             if(edge.get_trans_char() == word[index]) {
                 if(visited[dest_state].find(index + 1) == visited[dest_state].end()) {
                     stack.emplace_back(dest_state, index + 1);
@@ -83,4 +88,116 @@ bool Automaton::accept(const std::string &word) {
         }
     }
     return false;
+}
+
+Node::Node(const Node &other, const std::unordered_map<int, int> &new_keys) {
+    this->state = new_keys.at(other.state);
+    this->is_terminal = other.is_terminal;
+    for(const auto &edge : other.edges) {
+        this->edges.emplace_back(edge, new_keys);
+    }
+}
+
+Automaton Automaton::operator|(const Automaton &other) {
+    Automaton result;
+    int index = 0;
+    std::unordered_map<int, int> new_keys;
+
+    for(const auto &key_node : this->nodes) {
+        new_keys[key_node.first] = index++;
+    }
+    for(const auto &key_node : this->nodes) {
+        Node new_node = Node(key_node.second, new_keys);
+        result.nodes[new_node.get_state()] = new_node;
+    }
+    Edge e1 = Edge('-', new_keys[this->init_state]);
+
+    for(const auto &key_node : other.nodes) {
+        new_keys[key_node.first] = index++;
+    }
+    for(const auto &key_node : other.nodes) {
+        Node new_node = Node(key_node.second, new_keys);
+        result.nodes[new_node.get_state()] = new_node;
+    }
+    Edge e2 = Edge('-', new_keys[other.init_state]);
+
+    result.init_state = index;
+    result.nodes[index] = Node(index);
+    result.nodes[index].insert_edge(e1);
+    result.nodes[index].insert_edge(e2);
+
+    return result;
+}
+
+Automaton &Automaton::operator|=(const Automaton &other) {
+    *this = *this | other;
+    return *this;
+}
+
+Automaton Automaton::operator*(const Automaton &other) {
+    Automaton result;
+    int index = 0;
+    std::unordered_map<int, int> new_keys;
+    std::vector<int> term_states;
+
+    for(const auto &key_node : this->nodes) {
+        new_keys[key_node.first] = index++;
+        if(key_node.second.check_is_terminal()) {
+            term_states.push_back(index - 1);
+        }
+    }
+    for(const auto &key_node : this->nodes) {
+        Node new_node = Node(key_node.second, new_keys);
+        new_node.set_terminal(false);
+        result.nodes[new_node.get_state()] = new_node;
+    }
+    result.init_state = new_keys[this->init_state];
+
+    for(const auto &key_node : other.nodes) {
+        new_keys[key_node.first] = index++;
+    }
+    for(const auto &key_node : other.nodes) {
+        Node new_node = Node(key_node.second, new_keys);
+        result.nodes[new_node.get_state()] = new_node;
+    }
+
+    for(const auto &term : term_states) {
+        result.nodes[term].insert_edge(Edge('-', new_keys[other.init_state]));
+    }
+
+    return result;
+}
+
+Automaton &Automaton::operator*=(const Automaton &other) {
+    *this = *this * other;
+    return *this;
+}
+
+Automaton Automaton::operator*() {
+    Automaton result;
+    int index = 0;
+    std::unordered_map<int, int> new_keys;
+    std::vector<int> term_states;
+
+    for(const auto &key_node : this->nodes) {
+        new_keys[key_node.first] = index++;
+        if(key_node.second.check_is_terminal()) {
+            term_states.push_back(index - 1);
+        }
+    }
+    for(const auto &key_node : this->nodes) {
+        Node new_node = Node(key_node.second, new_keys);
+        result.nodes[new_node.get_state()] = new_node;
+    }
+
+    result.init_state = index;
+    result.nodes[index] = Node(index);
+    result.nodes[index].set_terminal(true);
+    result.nodes[index].insert_edge(Edge('-', new_keys[this->init_state]));
+
+    for(const auto &term : term_states) {
+        result.nodes[term].insert_edge(Edge('-', index));
+    }
+
+    return result;
 }

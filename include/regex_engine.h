@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "lambda_nfa.h"
+
+class ExpressionNotRegex : std::exception {};
 
 class SyntaxTreeNode {
 public:
@@ -29,16 +32,18 @@ public:
     int emplace_node(SyntaxTreeNode::NodeType type, char value);
     void insert_child(int father_index, int child_index);
     [[nodiscard]] const std::vector<SyntaxTreeNode> &get_nodes() const;
-    const SyntaxTreeNode &root() const;
+    [[nodiscard]] const SyntaxTreeNode &root() const;
 private:
     std::vector<SyntaxTreeNode> nodes;
 };
 
 class Regex {
 public:
-    Regex(std::string expr);
+    explicit Regex(std::string expr);
     bool eval(const std::string &word);
+    void set_expr(const std::string &new_expr);
 private:
+    Automaton l_nfa;
     std::string expr;
     SyntaxTree tree;
 };

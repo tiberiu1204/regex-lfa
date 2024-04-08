@@ -19,11 +19,12 @@ class Node;
 
 class Edge {
 private:
-    const char trans_char;
-    const Node &dest;
+    char trans_char;
+    int dest;
 public:
-    explicit Edge(char trans_char, Node &dest);
-    [[nodiscard]] const Node &get_dest() const;
+    explicit Edge(char trans_char, int dest);
+    Edge(const Edge &other, const std::unordered_map<int, int> &new_keys);
+    [[nodiscard]] int get_dest() const;
     [[nodiscard]] char get_trans_char() const;
 };
 
@@ -41,9 +42,10 @@ private:
     std::vector<Edge> edges;
 public:
     explicit Node(int state = 0);
+    Node(const Node &other, const std::unordered_map<int, int> &new_keys);
     void insert_edge(const Edge &edge);
     [[nodiscard]] bool check_is_terminal() const;
-    void set_terminal();
+    void set_terminal(bool is = true);
     [[nodiscard]] int get_state() const;
     [[nodiscard]] const std::vector<Edge> &get_edges() const;
 };
@@ -61,7 +63,7 @@ class Automaton {
 private:
     std::unordered_map<int, Node> nodes;
     int init_state;
-    std::vector<int> term_states;
+//    std::unordered_set<int> term_states;
 public:
     Automaton();
     void insert_node(int state);
@@ -76,6 +78,12 @@ public:
      */
 
     bool accept(const std::string &word);
+
+    Automaton operator|(const Automaton &other);
+    Automaton &operator|=(const Automaton &other);
+    Automaton operator*(const Automaton &other);
+    Automaton &operator*=(const Automaton &other);
+    Automaton operator*();
 };
 
 #endif //LAMBDANFA_LAMBDA_NFA_H
