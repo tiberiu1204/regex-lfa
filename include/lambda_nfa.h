@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+class NfaHasLambda : std::exception {};
+
 class Node;
 
 /*
@@ -63,31 +65,56 @@ public:
 
 class Automaton {
 private:
-    std::unordered_map<int, Node> nodes;
+    using IntSet = std::unordered_set<int>;
+    using CharSet = std::unordered_set<char>;
     int init_state;
+    std::unordered_map<int, Node> nodes;
+    IntSet get_state_set(const IntSet &state_set, char trans_char) const;
+    CharSet get_trans_char_set(const IntSet &state_set) const;
+    bool check_state_set_terminal(const IntSet &state_set);
 //    std::unordered_set<int> term_states;
 public:
     Automaton();
     explicit Automaton(char trans_char);
     void insert_node(int state);
     void insert_edge(int dest, int src, char tc);
-    void set_init_node(int state);
-    void add_term_node(int state);
+
+    /*
+     * Converts a valid non-lambda NFA to a new DFA, without changing the initial object.
+     */
+
+    Automaton to_dfa();
 
     /*
      * The accept function. Iterative implementation was preferred over the recursive one because for very large words
      * the stack would run out of space and crash the program. In this way, the program is also more memory efficient.
-     *
      */
 
     bool accept(const std::string &word);
 
+    /*
+     * Union between 2 automatons.
+     */
+
     Automaton operator|(const Automaton &other);
     Automaton &operator|=(const Automaton &other);
+
+    /*
+     * Concatenation between 2 automatons.
+     */
+
     Automaton operator*(const Automaton &other);
     Automaton &operator*=(const Automaton &other);
+
+    /*
+     * Staring of automaton.
+     */
+
     Automaton operator*();
-    void print() const;
+
+    friend std::istream &operator>>(std::istream in, Automaton &automaton);
+
+    [[maybe_unused]] void print() const;
 };
 
 #endif //LAMBDANFA_LAMBDA_NFA_H

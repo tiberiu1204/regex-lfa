@@ -53,6 +53,7 @@ private:
 
 /*
  * GRAMMAR:
+ *
  * expr :- concat expr' $ ;
  * expr' :- '|' concat expr' | epsilon ;
  * concat :- star concat' ;
@@ -60,6 +61,8 @@ private:
  * star :- primary star' ;
  * star' :- '*' | epsilon
  * primary :- literal | '(' expr ')' ;
+ *
+ * For LL(1)
  *
  * FIRST(expr) = { literal, ( }
  * FIRST(expr') = { |, epsilon }
@@ -80,12 +83,16 @@ private:
  */
 
 /*
- *  Using LL(1) algorithm to parse the regex expression according to the grammar described above and also building the
- *  AST (class SyntaxTree) in the process.
+ * Parses the regex expression itself, not the test string, and creates an AST that will be transformed into an
+ * NFA that will validate the test string afterward.
  */
 
 class Parser {
 public:
+    /*
+     *  Using LL(1) algorithm to parse the regex expression according to the grammar described above and also building the
+     *  AST (class SyntaxTree) in the process.
+     */
     static SyntaxTree parse(const std::string &word);
 private:
     enum Symbol {
