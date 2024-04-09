@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 class NfaHasLambda : std::exception {};
 
@@ -65,8 +66,8 @@ public:
 
 class Automaton {
 private:
-    using IntSet = std::unordered_set<int>;
-    using CharSet = std::unordered_set<char>;
+    using IntSet = std::set<int>;
+    using CharSet = std::set<char>;
     int init_state;
     std::unordered_map<int, Node> nodes;
     IntSet get_state_set(const IntSet &state_set, char trans_char) const;

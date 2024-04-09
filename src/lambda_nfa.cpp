@@ -1,5 +1,6 @@
 #include "lambda_nfa.h"
 #include <queue>
+#include <map>
 
 Edge::Edge(char trans_char, int dest) : trans_char(trans_char), dest(dest) {}
 
@@ -143,6 +144,7 @@ void Edge::print() const {
     for(const auto &state_node_p : nodes) {
         state_node_p.second.print();
     }
+    std::cout<<"\n";
 }
 
 Automaton Automaton::operator*(const Automaton &other) {
@@ -264,8 +266,9 @@ Automaton Automaton::to_dfa() {
 
     std::queue<IntSet> queue;
     queue.push({this->init_state});
+    std::map<IntSet, int> state_map;
+    state_map[queue.front()] = 0;
 
-    int queue_state_index = 0;
     while(!queue.empty()) {
         IntSet state_set = queue.front();
         queue.pop();
@@ -273,15 +276,18 @@ Automaton Automaton::to_dfa() {
         const CharSet trans_char_set = this->get_trans_char_set(state_set);
 
         for(const auto &trans_char : trans_char_set) {
-            const IntSet new_state_set = this->get_state_set(state_set, trans_char);
-            if(!new_state_set.empty()) queue.push(new_state_set);
-
-            result.insert_node(++new_state_index);
-            result.insert_edge(queue_state_index, new_state_index - 1, trans_char);
-            if(this->check_state_set_terminal(new_state_set))
-                result.nodes[new_state_index - 1].set_terminal(true);
+            IntSet new_state_set = this->get_state_set(state_set, trans_char);
+            if(!new_state_set.empty()) {
+                if(state_map.find(new_state_set) == state_map.end()) {
+                    queue.push(new_state_set);
+                    result.insert_node(++new_state_index);
+                    state_map[new_state_set] = new_state_index;
+                }
+                result.insert_edge(state_map.at(new_state_set), state_map.at(state_set), trans_char);
+                if(this->check_state_set_terminal(new_state_set))
+                    result.nodes[new_state_index].set_terminal(true);
+            }
         }
-        queue_state_index++;
     }
 
     return result;
