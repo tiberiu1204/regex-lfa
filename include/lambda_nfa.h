@@ -112,7 +112,7 @@ public:
 
     Automaton operator*();
 
-    friend std::istream &operator>>(std::istream in, Automaton &automaton);
+    friend std::istream &operator>>(std::istream &in, Automaton &automaton);
 
     [[maybe_unused]] void print() const;
 };

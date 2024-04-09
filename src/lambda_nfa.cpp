@@ -287,7 +287,7 @@ Automaton Automaton::to_dfa() {
     return result;
 }
 
-std::istream &operator>>(std::istream in, Automaton &automaton) {
+std::istream &operator>>(std::istream &in, Automaton &automaton) {
     int num_states;
     in >> num_states;
     for(int i = 0; i < num_states; i++) {
@@ -308,10 +308,12 @@ std::istream &operator>>(std::istream in, Automaton &automaton) {
     automaton.init_state = initial_state;
     int num_term_nodes;
     in >> num_term_nodes;
-    for(int i = 0; i < num_term_nodes; i++) {
+    for(size_t i = 0; i < num_term_nodes; i++) {
         int state;
         in >> state;
         automaton.nodes[state].set_terminal(true);
     }
+
+    return in;
 }
 
